@@ -19,3 +19,10 @@
 .risk-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:17px 0}.broker-settings h3{margin:8px 0 0}
 @media(max-width:850px){.broker-grid{grid-template-columns:1fr}.broker-main,.broker-settings{padding:18px}}
 @media(max-width:480px){.risk-fields{grid-template-columns:1fr}.connection-hero{align-items:flex-start}}
+
+
+/* Strict Exness trading symbol allowlist */
+.approved-symbol-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:18px}
+.approved-symbol{display:flex;flex-direction:column;gap:5px;padding:13px 15px;border:1px solid rgba(111,145,164,.2);border-radius:12px;background:rgba(18,47,65,.42);min-width:0}
+.approved-symbol b{font-size:14px;letter-spacing:.02em;color:#eaf5f8}
+.approved-symbol small{font-size:11px;color:#8fa9b8}
