@@ -26,3 +26,16 @@
 
 ## Release gates
 No live trading until the official Exness signature canonicalization, Gateway discovery, account permissions, market-data subscriptions, order schemas, event/operation reconciliation and demo test suite are implemented against the current official docs.
+
+
+## Approved trading universe (strict whitelist)
+The only permitted trading symbols are:
+
+| Category | Exact Exness symbol |
+|---|---|
+| Forex | `EURUSDm`, `GBPUSDm`, `AUDUSDm`, `NZDUSDm`, `USDCADm`, `USDCHFm`, `USDJPYm` |
+| Gold | `XAUUSDm`, `XAUUSD247m` |
+| Silver | `XAGUSDm` |
+| Crypto | `BTCUSDm` |
+
+Enforce this allowlist server-side before signal publication, order validation and execution. The frontend may display the same list for usability, but must never be the security boundary. Reject unknown symbols even if a client submits them directly. Preserve the exact broker symbol suffixes; do not silently map to unsuffixed symbols. Any addition or removal requires an explicit product-owner change and a matching backend test.
