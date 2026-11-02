@@ -22,7 +22,7 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - run: bun install
-      - run: bun run build
+      - name: Test Exness signing protocol\n        run: bun run test:exness\n      - run: bun run build
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
