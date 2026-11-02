@@ -1,5 +1,6 @@
 import { validateRiskProposal } from "./risk";
 import { APPROVED_EXNESS_SYMBOLS } from "./symbols";
+import { exnessSignedFetch } from "./signing";
 export interface Env {
   DB: D1Database;
   CREDENTIALS_ENCRYPTION_KEY: string;
@@ -31,9 +32,17 @@ async function encrypt(value: string, env: Env) {
   const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await encryptionKey(env), new TextEncoder().encode(value));
   return { ciphertext: toB64(new Uint8Array(cipher)), iv: toB64(iv) };
 }
+async function decrypt(ciphertext: string, ivValue: string, env: Env) {
+  const plain = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: b64u(ivValue) },
+    await encryptionKey(env),
+    b64u(ciphertext)
+  );
+  return new TextDecoder().decode(plain);
+}
 function safeGateway(value: string) {
   const u = new URL(value);
-  if (u.protocol !== "https:" || u.username || u.password || u.pathname !== "/" || u.search || u.hash) throw new Error("Gateway must be an HTTPS origin");
+  if (u.protocol !== "https:" || u.username || u.password || u.pathname !== "/" || u.search || u.hash || !(u.hostname === "exness.com" || u.hostname.endsWith(".exness.com"))) throw new Error("Gateway must be an official HTTPS Exness host from Key Management");
   return u.origin;
 }
 export default {
@@ -58,6 +67,32 @@ export default {
             .bind(id, claims.sub, apiKeyId.trim(), accountId.trim(), origin, sealed.ciphertext, sealed.iv, body.environment === "live" ? "live" : "demo", "pending_validation", new Date().toISOString()).run();
           return json({ id, accountId: accountId.trim(), environment: body.environment === "live" ? "live" : "demo", status: "pending_validation", message: "Credentials encrypted and stored. Live API validation is not enabled until the official Exness signing and account-discovery adapter is configured." }, 201);
         } catch (e) { return json({ error: "connection_storage_failed", detail: e instanceof Error ? e.message : "unknown" }, 500); }
+      }
+      if (req.method === "POST" && url.pathname.startsWith("/api/exness/connections/") && url.pathname.endsWith("/discover")) {
+        const id = url.pathname.split("/")[4];
+        if (!id) return json({ error: "missing_connection_id" }, 400);
+        const row = await env.DB.prepare("SELECT api_key_id,account_id,gateway_origin,private_key_ciphertext,private_key_iv FROM exness_connections WHERE id=? AND user_id=?").bind(id, claims.sub).first<any>();
+        if (!row) return json({ error: "connection_not_found" }, 404);
+        if (!/^\\d{1,20}$/.test(row.account_id) || BigInt(row.account_id) > 18446744073709551615n) return json({ error: "invalid_account_id" }, 400);
+        try {
+          const privateKey = await decrypt(row.private_key_ciphertext, row.private_key_iv, env);
+          const path = "/v1/trading/access-point?account_id=" + encodeURIComponent(row.account_id);
+          const response = await exnessSignedFetch({
+            baseUrl: row.gateway_origin,
+            apiKey: row.api_key_id,
+            privateKey,
+            method: "GET",
+            pathAndQuery: path
+          });
+          const payload: any = await response.json().catch(() => null);
+          if (!response.ok) return json({ error: "exness_discovery_failed", upstream_status: response.status, upstream_code: payload?.error_code ?? payload?.code ?? null }, 502);
+          if (payload?.account_id !== row.account_id || typeof payload?.access_point !== "string") return json({ error: "invalid_discovery_response" }, 502);
+          const accessPoint = new URL(payload.access_point);
+          if (accessPoint.protocol !== "https:" || !(accessPoint.hostname === "exness.com" || accessPoint.hostname.endsWith(".exness.com"))) return json({ error: "untrusted_access_point" }, 502);
+          return json({ account_id: row.account_id, access_point: accessPoint.origin, status: "access_point_discovered", note: "Discovery succeeded. Account authorization and a read-only account-details check are the next validation step. No trades were placed." });
+        } catch (e) {
+          return json({ error: "discovery_request_failed", detail: e instanceof Error ? e.message : "unknown" }, 502);
+        }
       }
       if (req.method === "GET" && url.pathname === "/api/exness/connections") {
         const rows = await env.DB.prepare("SELECT id,account_id,gateway_origin,environment,status,created_at FROM exness_connections WHERE user_id=? ORDER BY created_at DESC").bind(claims.sub).all();
