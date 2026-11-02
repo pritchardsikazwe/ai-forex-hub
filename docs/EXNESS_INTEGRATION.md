@@ -43,3 +43,12 @@ The Worker expects `Authorization: Bearer <JWT>`. JWTs must use HS256 with the C
 
 ## Frontend deployment
 The existing Vite site remains on Cloudflare Pages, connected to GitHub branch `main` (or a reviewed merge). Build command: `bun run build`; output: `dist`. The Worker is deployed separately.
+
+
+## Demo-only pre-trade risk gate (implemented; not an execution service)
+- `POST /api/exness/risk/validate` is authenticated and validates a proposed order without submitting it.
+- It rejects symbols outside the central 11-symbol allowlist, all live-environment proposals, invalid direction/price/volume inputs, missing protective stop-loss values, risk above 2% per trade, and daily-loss settings above 3%.
+- A successful response explicitly returns `execution: "not_submitted"`. This endpoint is a policy pre-check, not a broker order validator.
+- It does not calculate actual cash risk or margin because trusted broker instrument metadata (tick size/value, contract size, volume steps and margin rules) is not yet connected.
+- Before any order route is enabled, add tests for every rejection case and positive case, load trusted instrument metadata from Exness, calculate monetary exposure, enforce aggregate open-risk and daily realised/unrealised loss, add idempotency and audit records, then certify all flows on demo.
+- Automated strategies must pass through this gate and a separate user-consent/kill-switch policy. This endpoint does not run a bot or place trades.
