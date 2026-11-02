@@ -75,7 +75,7 @@ export default {
         if (!id) return json({ error: "missing_connection_id" }, 400);
         const row = await env.DB.prepare("SELECT api_key_id,account_id,gateway_origin,private_key_ciphertext,private_key_iv FROM exness_connections WHERE id=? AND user_id=?").bind(id, claims.sub).first<any>();
         if (!row) return json({ error: "connection_not_found" }, 404);
-        if (!/^\\d{1,20}$/.test(row.account_id) || BigInt(row.account_id) > 18446744073709551615n) return json({ error: "invalid_account_id" }, 400);
+        if (!/^\d{1,20}$/.test(row.account_id) || BigInt(row.account_id) > 18446744073709551615n) return json({ error: "invalid_account_id" }, 400);
         try {
           const privateKey = await decrypt(row.private_key_ciphertext, row.private_key_iv, env);
           const discoveryPath = "/v1/trading/access-point?account_id=" + encodeURIComponent(row.account_id);
@@ -160,7 +160,7 @@ export default {
         if (!id) return json({ error: "missing_connection_id" }, 400);
         const row = await env.DB.prepare("SELECT api_key_id,account_id,gateway_origin,private_key_ciphertext,private_key_iv FROM exness_connections WHERE id=? AND user_id=?").bind(id, claims.sub).first<any>();
         if (!row) return json({ error: "connection_not_found" }, 404);
-        if (!/^\\d{1,20}$/.test(row.account_id) || BigInt(row.account_id) > 18446744073709551615n) return json({ error: "invalid_account_id" }, 400);
+        if (!/^\d{1,20}$/.test(row.account_id) || BigInt(row.account_id) > 18446744073709551615n) return json({ error: "invalid_account_id" }, 400);
         try {
           const privateKey = await decrypt(row.private_key_ciphertext, row.private_key_iv, env);
           const path = "/v1/trading/access-point?account_id=" + encodeURIComponent(row.account_id);
