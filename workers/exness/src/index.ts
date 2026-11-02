@@ -69,6 +69,53 @@ export default {
         } catch (e) { return json({ error: "connection_storage_failed", detail: e instanceof Error ? e.message : "unknown" }, 500); }
       }
 
+
+      if (req.method === "GET" && url.pathname.startsWith("/api/exness/connections/") && url.pathname.endsWith("/snapshot")) {
+        const id = url.pathname.split("/")[4];
+        if (!id) return json({ error: "missing_connection_id" }, 400);
+        const row = await env.DB.prepare("SELECT api_key_id,account_id,gateway_origin,private_key_ciphertext,private_key_iv FROM exness_connections WHERE id=? AND user_id=?").bind(id, claims.sub).first<any>();
+        if (!row) return json({ error: "connection_not_found" }, 404);
+        if (!/^\\d{1,20}$/.test(row.account_id) || BigInt(row.account_id) > 18446744073709551615n) return json({ error: "invalid_account_id" }, 400);
+        try {
+          const privateKey = await decrypt(row.private_key_ciphertext, row.private_key_iv, env);
+          const discoveryPath = "/v1/trading/access-point?account_id=" + encodeURIComponent(row.account_id);
+          const discovery = await exnessSignedFetch({ baseUrl: row.gateway_origin, apiKey: row.api_key_id, privateKey, method: "GET", pathAndQuery: discoveryPath });
+          const discovered: any = await discovery.json().catch(() => null);
+          if (!discovery.ok) return json({ error: "exness_discovery_failed", upstream_status: discovery.status, upstream_code: discovered?.code ?? null }, 502);
+          if (discovered?.account_id !== row.account_id || typeof discovered?.access_point !== "string") return json({ error: "invalid_discovery_response" }, 502);
+          const accessPoint = new URL(discovered.access_point);
+          if (accessPoint.protocol !== "https:" || !(accessPoint.hostname === "exness.com" || accessPoint.hostname.endsWith(".exness.com"))) return json({ error: "untrusted_access_point" }, 502);
+          const accountPath = "/v1/configuration/accounts/" + encodeURIComponent(row.account_id) + "/account";
+          const accountResponse = await exnessSignedFetch({ baseUrl: accessPoint.origin, apiKey: row.api_key_id, privateKey, method: "GET", pathAndQuery: accountPath });
+          const account: any = await accountResponse.json().catch(() => null);
+          if (!accountResponse.ok) return json({ error: "exness_account_validation_failed", upstream_status: accountResponse.status, upstream_code: account?.code ?? null }, 502);
+          if (account?.account_id !== row.account_id) return json({ error: "invalid_account_response" }, 502);
+          if (account?.settings?.trade_mode === "trading_disabled") return json({ account_id: row.account_id, account_status: account.settings.account_status ?? null, trade_mode: "trading_disabled", positions: [], orders: [], account_state: null, snapshot_status: "unavailable_for_trading_disabled_account", trading: "disabled" });
+          const snapshotPath = "/v1/trading/accounts/" + encodeURIComponent(row.account_id) + "/snapshot";
+          const snapshotResponse = await exnessSignedFetch({ baseUrl: accessPoint.origin, apiKey: row.api_key_id, privateKey, method: "GET", pathAndQuery: snapshotPath });
+          const raw: any = await snapshotResponse.json().catch(() => null);
+          if (!snapshotResponse.ok) return json({ error: "exness_snapshot_failed", upstream_status: snapshotResponse.status, upstream_code: raw?.code ?? null }, 502);
+          const snapshot = raw?.snapshot && typeof raw.snapshot === "object" ? raw.snapshot : raw;
+          if (!snapshot || typeof snapshot !== "object" || !snapshot.account_state || typeof snapshot.account_state !== "object" || !Array.isArray(snapshot.positions) || !Array.isArray(snapshot.orders)) return json({ error: "invalid_snapshot_response" }, 502);
+          const accountState = snapshot.account_state;
+          return json({
+            account_id: row.account_id,
+            currency: account?.settings?.currency ?? null,
+            account_status: account?.settings?.account_status ?? null,
+            trade_mode: account?.settings?.trade_mode ?? null,
+            account_state: accountState,
+            positions: snapshot.positions,
+            orders: snapshot.orders,
+            position_count: snapshot.positions.length,
+            order_count: snapshot.orders.length,
+            snapshot_status: "read_only_success",
+            trading: "disabled",
+            note: "Live account state is read-only. No orders or positions were changed."
+          });
+        } catch (e) {
+          return json({ error: "account_snapshot_request_failed", detail: e instanceof Error ? e.message : "unknown" }, 502);
+        }
+      }
       if (req.method === "POST" && url.pathname.startsWith("/api/exness/connections/") && url.pathname.endsWith("/validate")) {
         const id = url.pathname.split("/")[4];
         if (!id) return json({ error: "missing_connection_id" }, 400);
