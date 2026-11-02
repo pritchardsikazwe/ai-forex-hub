@@ -27,7 +27,7 @@ jobs:
       - name: Build Kopela frontend
         run: bun run build
         env:
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_URL: https://yndmvvndwqkfdxtocycv.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
