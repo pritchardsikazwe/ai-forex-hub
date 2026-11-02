@@ -68,6 +68,46 @@ export default {
           return json({ id, accountId: accountId.trim(), environment: body.environment === "live" ? "live" : "demo", status: "pending_validation", message: "Credentials encrypted and stored. Live API validation is not enabled until the official Exness signing and account-discovery adapter is configured." }, 201);
         } catch (e) { return json({ error: "connection_storage_failed", detail: e instanceof Error ? e.message : "unknown" }, 500); }
       }
+
+      if (req.method === "POST" && url.pathname.startsWith("/api/exness/connections/") && url.pathname.endsWith("/validate")) {
+        const id = url.pathname.split("/")[4];
+        if (!id) return json({ error: "missing_connection_id" }, 400);
+        const row = await env.DB.prepare("SELECT api_key_id,account_id,gateway_origin,private_key_ciphertext,private_key_iv FROM exness_connections WHERE id=? AND user_id=?").bind(id, claims.sub).first<any>();
+        if (!row) return json({ error: "connection_not_found" }, 404);
+        if (!/^\d{1,20}$/.test(row.account_id) || BigInt(row.account_id) > 18446744073709551615n) return json({ error: "invalid_account_id" }, 400);
+        try {
+          const privateKey = await decrypt(row.private_key_ciphertext, row.private_key_iv, env);
+          const discoveryPath = "/v1/trading/access-point?account_id=" + encodeURIComponent(row.account_id);
+          const discovery = await exnessSignedFetch({ baseUrl: row.gateway_origin, apiKey: row.api_key_id, privateKey, method: "GET", pathAndQuery: discoveryPath });
+          const discovered: any = await discovery.json().catch(() => null);
+          if (!discovery.ok) return json({ error: "exness_discovery_failed", upstream_status: discovery.status, upstream_code: discovered?.code ?? null }, 502);
+          if (discovered?.account_id !== row.account_id || typeof discovered?.access_point !== "string") return json({ error: "invalid_discovery_response" }, 502);
+          const accessPoint = new URL(discovered.access_point);
+          if (accessPoint.protocol !== "https:" || !(accessPoint.hostname === "exness.com" || accessPoint.hostname.endsWith(".exness.com"))) return json({ error: "untrusted_access_point" }, 502);
+          const accountPath = "/v1/configuration/accounts/" + encodeURIComponent(row.account_id) + "/account";
+          const accountResponse = await exnessSignedFetch({ baseUrl: accessPoint.origin, apiKey: row.api_key_id, privateKey, method: "GET", pathAndQuery: accountPath });
+          const account: any = await accountResponse.json().catch(() => null);
+          if (!accountResponse.ok) return json({ error: "exness_account_validation_failed", upstream_status: accountResponse.status, upstream_code: account?.code ?? null }, 502);
+          if (account?.account_id !== row.account_id || typeof account?.settings?.currency !== "string" || typeof account?.settings?.leverage !== "string" || !["enabled", "trading_disabled"].includes(account?.settings?.trade_mode) || !["active", "close_only"].includes(account?.settings?.account_status)) return json({ error: "invalid_account_response" }, 502);
+          return json({
+            account: {
+              account_id: account.account_id,
+              account_name: typeof account.account_name === "string" ? account.account_name : null,
+              currency: account.settings.currency,
+              leverage: account.settings.leverage,
+              trade_mode: account.settings.trade_mode,
+              account_status: account.settings.account_status,
+              execution_mode: account.settings.execution_mode ?? "undefined"
+            },
+            validation: "read_only_success",
+            access_point: accessPoint.origin,
+            trading: "disabled",
+            note: "Account identity and read permissions verified. No balance query or trade operation was performed."
+          });
+        } catch (e) {
+          return json({ error: "account_validation_request_failed", detail: e instanceof Error ? e.message : "unknown" }, 502);
+        }
+      }
       if (req.method === "POST" && url.pathname.startsWith("/api/exness/connections/") && url.pathname.endsWith("/discover")) {
         const id = url.pathname.split("/")[4];
         if (!id) return json({ error: "missing_connection_id" }, 400);
