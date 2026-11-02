@@ -9,7 +9,7 @@ export interface Env {
 }
 type Claims = { sub: string; exp: number; iss?: string; aud?: string };
 
-const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json", "cache-control": "no-store", "access-control-allow-origin": "*", "access-control-allow-methods": "GET,POST,DELETE,OPTIONS", "access-control-allow-headers": "Authorization,Content-Type", "access-control-max-age": "86400" } });
+const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json", "cache-control": "no-store", "access-control-allow-origin": "https://pritchardsikazwe.github.io", "access-control-allow-methods": "GET,POST,DELETE,OPTIONS", "access-control-allow-headers": "Authorization,Content-Type", "access-control-max-age": "86400" } });
 const b64u = (s: string) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0));
 const toB64 = (a: Uint8Array) => btoa(String.fromCharCode(...a)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 async function authenticate(req: Request, env: Env): Promise<Claims | null> {
@@ -48,7 +48,7 @@ function safeGateway(value: string) {
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
-    if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: { "access-control-allow-origin": "*", "access-control-allow-methods": "GET,POST,DELETE,OPTIONS", "access-control-allow-headers": "Authorization,Content-Type", "access-control-max-age": "86400" } });
+    if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: { "access-control-allow-origin": "https://pritchardsikazwe.github.io", "access-control-allow-methods": "GET,POST,DELETE,OPTIONS", "access-control-allow-headers": "Authorization,Content-Type", "access-control-max-age": "86400" } });
     if (req.method === "GET" && url.pathname === "/health") return json({ service: "ai-forex-hub-exness", status: "online", trading: "disabled_until_official_adapter_validation" });
     if (url.pathname.startsWith("/api/")) {
       const claims = await authenticate(req, env);
