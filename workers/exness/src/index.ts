@@ -5,6 +5,11 @@ export interface Env {
   EXNESS_API_BASE_URL?: string;
 }
 type Claims = { sub: string; exp: number; iss?: string; aud?: string };
+export const APPROVED_EXNESS_SYMBOLS = [
+  "EURUSDm", "GBPUSDm", "AUDUSDm", "NZDUSDm", "USDCADm", "USDCHFm", "USDJPYm",
+  "XAUUSDm", "XAUUSD247m", "XAGUSDm", "BTCUSDm"
+] as const;
+
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 const b64u = (s: string) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0));
 const toB64 = (a: Uint8Array) => btoa(String.fromCharCode(...a)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
@@ -66,6 +71,7 @@ export default {
         const result = await env.DB.prepare("DELETE FROM exness_connections WHERE id=? AND user_id=?").bind(id, claims.sub).run();
         return json({ deleted: (result.meta.changes ?? 0) > 0 });
       }
+      if (req.method === "GET" && url.pathname === "/api/exness/instruments") return json({ instruments: APPROVED_EXNESS_SYMBOLS, count: APPROVED_EXNESS_SYMBOLS.length, policy: "strict_allowlist" });
       if (url.pathname.startsWith("/api/exness/trading/")) return json({ error: "trading_adapter_not_enabled", message: "Order placement, position management and market-data routes remain disabled until Exness API signing, access-point discovery, response verification and demo certification are implemented." }, 503);
     }
     return json({ error: "not_found" }, 404);
