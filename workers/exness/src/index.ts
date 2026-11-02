@@ -1,3 +1,4 @@
+import { validateRiskProposal } from "./risk";
 export interface Env {
   DB: D1Database;
   CREDENTIALS_ENCRYPTION_KEY: string;
@@ -72,6 +73,12 @@ export default {
         return json({ deleted: (result.meta.changes ?? 0) > 0 });
       }
       if (req.method === "GET" && url.pathname === "/api/exness/instruments") return json({ instruments: APPROVED_EXNESS_SYMBOLS, count: APPROVED_EXNESS_SYMBOLS.length, policy: "strict_allowlist" });
+      if (req.method === "POST" && url.pathname === "/api/exness/risk/validate") {
+        let proposal: unknown;
+        try { proposal = await req.json(); } catch { return json({ error: "invalid_json", execution: "not_submitted" }, 400); }
+        const decision = validateRiskProposal(proposal);
+        return json(decision, decision.allowed ? 200 : 422);
+      }
       if (url.pathname.startsWith("/api/exness/trading/")) return json({ error: "trading_adapter_not_enabled", message: "Order placement, position management and market-data routes remain disabled until Exness API signing, access-point discovery, response verification and demo certification are implemented." }, 503);
     }
     return json({ error: "not_found" }, 404);
