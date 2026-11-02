@@ -9,4 +9,5 @@ database_id = "REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID"
 migrations_dir = "migrations"
 
 [vars]
+SUPABASE_URL = "https://yndmvvndwqkfdxtocycv.supabase.co"
 # Configure SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY as Worker vars. Never commit private keys or encryption secrets.
