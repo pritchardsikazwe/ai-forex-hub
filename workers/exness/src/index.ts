@@ -14,10 +14,12 @@ const json = (data: unknown, status = 200) => new Response(JSON.stringify(data),
 const b64u = (s: string) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0));
 const toB64 = (a: Uint8Array) => btoa(String.fromCharCode(...a)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 async function authenticate(req: Request, env: Env): Promise<Claims | null> {
-  const token = req.headers.get("authorization")?.replace(/^Bearer\\s+/i, "");
+  const authorization = req.headers.get("authorization") ?? "";
+  const token = authorization.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : "";
   if (!token || !env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) return null;
   try {
-    const response = await fetch(env.SUPABASE_URL.replace(/\\/$/, "") + "/auth/v1/user", {
+    const projectUrl = env.SUPABASE_URL.endsWith("/") ? env.SUPABASE_URL.slice(0, -1) : env.SUPABASE_URL;
+    const response = await fetch(projectUrl + "/auth/v1/user", {
       headers: { apikey: env.SUPABASE_PUBLISHABLE_KEY, Authorization: "Bearer " + token }
     });
     if (!response.ok) return null;
