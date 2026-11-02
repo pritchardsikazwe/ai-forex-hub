@@ -4,7 +4,8 @@ import { exnessSignedFetch } from "./signing";
 export interface Env {
   DB: D1Database;
   CREDENTIALS_ENCRYPTION_KEY: string;
-  AUTH_JWT_SECRET: string;
+  SUPABASE_URL: string;
+  SUPABASE_PUBLISHABLE_KEY: string;
   EXNESS_API_BASE_URL?: string;
 }
 type Claims = { sub: string; exp: number; iss?: string; aud?: string };
@@ -13,14 +14,16 @@ const json = (data: unknown, status = 200) => new Response(JSON.stringify(data),
 const b64u = (s: string) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0));
 const toB64 = (a: Uint8Array) => btoa(String.fromCharCode(...a)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 async function authenticate(req: Request, env: Env): Promise<Claims | null> {
-  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  if (!token || !env.AUTH_JWT_SECRET) return null;
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(env.AUTH_JWT_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
-  const valid = await crypto.subtle.verify("HMAC", key, b64u(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
-  if (!valid) return null;
-  try { const claims = JSON.parse(new TextDecoder().decode(b64u(parts[1]))) as Claims; return claims.sub && claims.exp * 1000 > Date.now() ? claims : null; } catch { return null; }
+  const token = req.headers.get("authorization")?.replace(/^Bearer\\s+/i, "");
+  if (!token || !env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) return null;
+  try {
+    const response = await fetch(env.SUPABASE_URL.replace(/\\/$/, "") + "/auth/v1/user", {
+      headers: { apikey: env.SUPABASE_PUBLISHABLE_KEY, Authorization: "Bearer " + token }
+    });
+    if (!response.ok) return null;
+    const user = await response.json() as { id?: string };
+    return user.id ? { sub: user.id, exp: Math.floor(Date.now() / 1000) + 60 } : null;
+  } catch { return null; }
 }
 async function encryptionKey(env: Env) {
   const raw = Uint8Array.from(atob(env.CREDENTIALS_ENCRYPTION_KEY), c => c.charCodeAt(0));
