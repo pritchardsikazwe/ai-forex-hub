@@ -1,5 +1,5 @@
 const enc = new TextEncoder();
-const b64url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/g, "");
+const b64url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).split("+").join("-").split("/").join("_").split("=").join("");
 
 function decodeBase64(value: string): Uint8Array {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
@@ -13,7 +13,7 @@ function privateKeyPkcs8(value: string): Uint8Array {
     // RFC 8410 PKCS#8 wrapper around the 32-byte Ed25519 seed.
     return new Uint8Array([0x30,0x2e,0x02,0x01,0x00,0x30,0x05,0x06,0x03,0x2b,0x65,0x70,0x04,0x22,0x04,0x20,...seed]);
   }
-  const pem = trimmed.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\\s/g, "");
+  const pem = trimmed.split("-----BEGIN PRIVATE KEY-----").join("").split("-----END PRIVATE KEY-----").join("").split("\n").join("").split("\r").join("").split(" ").join("").split("\t").join("");
   return decodeBase64(pem);
 }
 
