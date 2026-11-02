@@ -28,6 +28,12 @@ bun run build
 bun run preview
 ```
 
+## Kopela authentication setup
+
+The frontend uses Supabase Auth for email/password registration and sign-in, email confirmation, password reset and Google OAuth. Configure GitHub Actions repository variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` using a dedicated Kopela Supabase project. Enable Google in Supabase Auth and add the GitHub Pages URL to the allowed redirect URLs. Do not reuse the SifoBooks project or expose a service-role key.
+
+The Exness Worker validates bearer tokens against the same project's `/auth/v1/user` endpoint. Configure Worker variables/secrets `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `CREDENTIALS_ENCRYPTION_KEY`.
+
 ## Current Exness integration status
 
 The frontend includes an Exness broker terminal workspace with manual, semi-automatic and fully automatic preference modes, demo/live environment selection, and risk preference controls. These controls are currently a frontend preview only.
