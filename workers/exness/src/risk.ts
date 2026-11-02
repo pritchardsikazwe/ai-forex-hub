@@ -1,4 +1,4 @@
-import { APPROVED_EXNESS_SYMBOLS } from "./index";
+import { APPROVED_EXNESS_SYMBOLS } from "./symbols";
 
 export type RiskProposal = {
   symbol: string;
