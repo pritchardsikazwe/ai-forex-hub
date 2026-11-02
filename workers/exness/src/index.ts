@@ -1,4 +1,5 @@
 import { validateRiskProposal } from "./risk";
+import { APPROVED_EXNESS_SYMBOLS } from "./symbols";
 export interface Env {
   DB: D1Database;
   CREDENTIALS_ENCRYPTION_KEY: string;
@@ -6,10 +7,6 @@ export interface Env {
   EXNESS_API_BASE_URL?: string;
 }
 type Claims = { sub: string; exp: number; iss?: string; aud?: string };
-export const APPROVED_EXNESS_SYMBOLS = [
-  "EURUSDm", "GBPUSDm", "AUDUSDm", "NZDUSDm", "USDCADm", "USDCHFm", "USDJPYm",
-  "XAUUSDm", "XAUUSD247m", "XAGUSDm", "BTCUSDm"
-] as const;
 
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 const b64u = (s: string) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0));
