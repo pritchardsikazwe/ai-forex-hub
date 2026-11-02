@@ -24,7 +24,11 @@ jobs:
       - run: bun install
       - name: Test Exness signing protocol
         run: bun run test:exness
-      - name: Build Kopela frontend\n        run: bun run build\n        env:\n          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}\n          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      - name: Build Kopela frontend
+        run: bun run build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
