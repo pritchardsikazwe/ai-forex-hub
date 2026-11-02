@@ -24,7 +24,7 @@ const courses = [
   {level:'INTERMEDIATE',title:'Technical analysis essentials',desc:'Read price action, identify structure and build a repeatable chart routine.',progress:28,lessons:'3 of 10 lessons',time:'4h 15m'},
   {level:'RISK MANAGEMENT',title:'Protecting your capital',desc:'Position sizing, risk-to-reward and practical rules for disciplined trading.',progress:0,lessons:'0 of 7 lessons',time:'1h 50m'}
 ]
-function App(){
+function App({accessToken,userEmail,onSignOut}:{accessToken:string;userEmail:string;onSignOut:()=>void}){
  const [section,setSection]=useState<Section>('Overview')
  const [mobileOpen,setMobileOpen]=useState(false)
  const [notice,setNotice]=useState('This workspace is running with sample data. Connect your services to enable live account and partner reporting.')
@@ -42,7 +42,7 @@ function App(){
  const [riskPercent,setRiskPercent]=useState('1')
  const [dailyLoss,setDailyLoss]=useState('3')
  const [snapshotApi,setSnapshotApi]=useState('')
- const [snapshotToken,setSnapshotToken]=useState('')
+ const [snapshotToken,setSnapshotToken]=useState(accessToken)
  const [snapshotConnectionId,setSnapshotConnectionId]=useState('')
  const [snapshotLoading,setSnapshotLoading]=useState(false)
  const [snapshotError,setSnapshotError]=useState('')
