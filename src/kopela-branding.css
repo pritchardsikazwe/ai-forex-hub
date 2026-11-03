@@ -1,0 +1,16 @@
+/* Kopela identity refresh: emerald + champagne-gold, aligned with logo */
+.broker-mode{--terminal-gold:#e9bd3e;--terminal-emerald:#42d9a3;background:radial-gradient(ellipse at 50% -18%,#164334 0,transparent 42%),#071511!important}
+.broker-mode .brand-mark{background:linear-gradient(145deg,#0a5c40,#071d15);color:#f0c64a;border:1px solid #dcb43a;box-shadow:0 0 0 3px #e9bd3e12,0 0 24px #39d6a01a}
+.broker-mode .brand-light{color:#e9bd3e!important}
+.broker-mode .desktop-nav{background:#0a2018;border-color:#214635}
+.broker-mode .nav-link.active{background:linear-gradient(120deg,#0d7651,#13583f)!important;color:#f6d778!important;box-shadow:inset 0 0 0 1px #d9b53c44,0 5px 16px #06140d}
+.broker-mode .quick-robot-cta.quick-start,.broker-mode .robot-home-start{background:linear-gradient(110deg,#dba91f,#f6d875);border-color:#e9bd3e;color:#132019}
+.broker-mode .robot-home-hero{background:radial-gradient(ellipse at 80% 45%,#14513d 0%,transparent 46%),linear-gradient(125deg,#061810,#0b261b 56%,#092b20);border-color:#28533c}
+.broker-mode .robot-core{background:linear-gradient(145deg,#174b36,#0b2419);border-color:#e9bd3e;color:#f4d56c;box-shadow:0 0 45px #37d7a52b,inset 0 0 24px #37d7a51b}
+.broker-mode .robot-orbit{border-color:#45d7b052}.broker-mode .robot-orbit.orbit-b{border-color:#eac64c4d}
+.broker-mode .robot-card,.broker-mode .robot-metrics>div{background:linear-gradient(145deg,#10251a,#091810);border-color:#254a35}
+.broker-mode .robot-strategy.active{background:linear-gradient(145deg,#17452f,#10251a);box-shadow:inset 0 0 0 1px #d8b43b2e,0 8px 20px #0002}
+.broker-mode .robot-action{background:linear-gradient(100deg,#dba91f,#f5d66b);color:#132019}
+.broker-mode .robot-card-head h3,.broker-mode .robot-metrics b{color:#f2f5e9}
+.broker-mode .footer-brand{color:#e9bd3e}
+@media(prefers-reduced-motion:reduce){.broker-mode .brand-mark,.broker-mode .robot-home-hero *{animation:none!important;transition:none!important}}
