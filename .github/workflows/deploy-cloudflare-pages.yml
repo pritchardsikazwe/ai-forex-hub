@@ -1,0 +1,32 @@
+name: Deploy Kopela frontend to Cloudflare Worker
+on:
+  push:
+    branches: [feature/exness-trading-integration]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: kopela-frontend-worker
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: Run Exness signing tests
+        run: bun run test:exness
+      - name: Build Kopela frontend
+        run: bun run build
+        env:
+          VITE_SUPABASE_URL: https://yndmvvndwqkfdxtocycv.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      - name: Deploy existing ai-forex-hub Worker with static assets
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

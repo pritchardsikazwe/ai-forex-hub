@@ -1,12 +1,13 @@
-name = "ai-forex-hub-exness-api"
+name = "kopela-exness-api"
 main = "src/index.ts"
 compatibility_date = "2026-11-02"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "ai-forex-hub"
-database_id = "REPLACE_WITH_CLOUDFLARE_D1_DATABASE_ID"
+database_name = "kopela-exness-db"
+database_id = "926bd386-340f-479d-9ca6-6098f7f3f10b"
 migrations_dir = "migrations"
 
 [vars]
-# Never put private keys or JWT/encryption secrets in this file.
+SUPABASE_URL = "https://yndmvvndwqkfdxtocycv.supabase.co"
+# Configure SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY as Worker vars. Never commit private keys or encryption secrets.

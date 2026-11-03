@@ -4,23 +4,28 @@ import { exnessSignedFetch } from "./signing";
 export interface Env {
   DB: D1Database;
   CREDENTIALS_ENCRYPTION_KEY: string;
-  AUTH_JWT_SECRET: string;
+  SUPABASE_URL: string;
+  SUPABASE_PUBLISHABLE_KEY: string;
   EXNESS_API_BASE_URL?: string;
 }
 type Claims = { sub: string; exp: number; iss?: string; aud?: string };
 
-const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json", "cache-control": "no-store", "access-control-allow-origin": "https://pritchardsikazwe.github.io", "access-control-allow-methods": "GET,POST,DELETE,OPTIONS", "access-control-allow-headers": "Authorization,Content-Type", "access-control-max-age": "86400" } });
 const b64u = (s: string) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0));
 const toB64 = (a: Uint8Array) => btoa(String.fromCharCode(...a)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 async function authenticate(req: Request, env: Env): Promise<Claims | null> {
-  const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  if (!token || !env.AUTH_JWT_SECRET) return null;
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(env.AUTH_JWT_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
-  const valid = await crypto.subtle.verify("HMAC", key, b64u(parts[2]), new TextEncoder().encode(parts[0] + "." + parts[1]));
-  if (!valid) return null;
-  try { const claims = JSON.parse(new TextDecoder().decode(b64u(parts[1]))) as Claims; return claims.sub && claims.exp * 1000 > Date.now() ? claims : null; } catch { return null; }
+  const authorization = req.headers.get("authorization") ?? "";
+  const token = authorization.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : "";
+  if (!token || !env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) return null;
+  try {
+    const projectUrl = env.SUPABASE_URL.endsWith("/") ? env.SUPABASE_URL.slice(0, -1) : env.SUPABASE_URL;
+    const response = await fetch(projectUrl + "/auth/v1/user", {
+      headers: { apikey: env.SUPABASE_PUBLISHABLE_KEY, Authorization: "Bearer " + token }
+    });
+    if (!response.ok) return null;
+    const user = await response.json() as { id?: string };
+    return user.id ? { sub: user.id, exp: Math.floor(Date.now() / 1000) + 60 } : null;
+  } catch { return null; }
 }
 async function encryptionKey(env: Env) {
   const raw = Uint8Array.from(atob(env.CREDENTIALS_ENCRYPTION_KEY), c => c.charCodeAt(0));
@@ -48,6 +53,7 @@ function safeGateway(value: string) {
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
+    if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: { "access-control-allow-origin": "https://pritchardsikazwe.github.io", "access-control-allow-methods": "GET,POST,DELETE,OPTIONS", "access-control-allow-headers": "Authorization,Content-Type", "access-control-max-age": "86400" } });
     if (req.method === "GET" && url.pathname === "/health") return json({ service: "ai-forex-hub-exness", status: "online", trading: "disabled_until_official_adapter_validation" });
     if (url.pathname.startsWith("/api/")) {
       const claims = await authenticate(req, env);
@@ -69,6 +75,53 @@ export default {
         } catch (e) { return json({ error: "connection_storage_failed", detail: e instanceof Error ? e.message : "unknown" }, 500); }
       }
 
+
+      if (req.method === "GET" && url.pathname.startsWith("/api/exness/connections/") && url.pathname.endsWith("/snapshot")) {
+        const id = url.pathname.split("/")[4];
+        if (!id) return json({ error: "missing_connection_id" }, 400);
+        const row = await env.DB.prepare("SELECT api_key_id,account_id,gateway_origin,private_key_ciphertext,private_key_iv FROM exness_connections WHERE id=? AND user_id=?").bind(id, claims.sub).first<any>();
+        if (!row) return json({ error: "connection_not_found" }, 404);
+        if (!/^\d{1,20}$/.test(row.account_id) || BigInt(row.account_id) > 18446744073709551615n) return json({ error: "invalid_account_id" }, 400);
+        try {
+          const privateKey = await decrypt(row.private_key_ciphertext, row.private_key_iv, env);
+          const discoveryPath = "/v1/trading/access-point?account_id=" + encodeURIComponent(row.account_id);
+          const discovery = await exnessSignedFetch({ baseUrl: row.gateway_origin, apiKey: row.api_key_id, privateKey, method: "GET", pathAndQuery: discoveryPath });
+          const discovered: any = await discovery.json().catch(() => null);
+          if (!discovery.ok) return json({ error: "exness_discovery_failed", upstream_status: discovery.status, upstream_code: discovered?.code ?? null }, 502);
+          if (discovered?.account_id !== row.account_id || typeof discovered?.access_point !== "string") return json({ error: "invalid_discovery_response" }, 502);
+          const accessPoint = new URL(discovered.access_point);
+          if (accessPoint.protocol !== "https:" || !(accessPoint.hostname === "exness.com" || accessPoint.hostname.endsWith(".exness.com"))) return json({ error: "untrusted_access_point" }, 502);
+          const accountPath = "/v1/configuration/accounts/" + encodeURIComponent(row.account_id) + "/account";
+          const accountResponse = await exnessSignedFetch({ baseUrl: accessPoint.origin, apiKey: row.api_key_id, privateKey, method: "GET", pathAndQuery: accountPath });
+          const account: any = await accountResponse.json().catch(() => null);
+          if (!accountResponse.ok) return json({ error: "exness_account_validation_failed", upstream_status: accountResponse.status, upstream_code: account?.code ?? null }, 502);
+          if (account?.account_id !== row.account_id) return json({ error: "invalid_account_response" }, 502);
+          if (account?.settings?.trade_mode === "trading_disabled") return json({ account_id: row.account_id, account_status: account.settings.account_status ?? null, trade_mode: "trading_disabled", positions: [], orders: [], account_state: null, snapshot_status: "unavailable_for_trading_disabled_account", trading: "disabled" });
+          const snapshotPath = "/v1/trading/accounts/" + encodeURIComponent(row.account_id) + "/snapshot";
+          const snapshotResponse = await exnessSignedFetch({ baseUrl: accessPoint.origin, apiKey: row.api_key_id, privateKey, method: "GET", pathAndQuery: snapshotPath });
+          const raw: any = await snapshotResponse.json().catch(() => null);
+          if (!snapshotResponse.ok) return json({ error: "exness_snapshot_failed", upstream_status: snapshotResponse.status, upstream_code: raw?.code ?? null }, 502);
+          const snapshot = raw?.snapshot && typeof raw.snapshot === "object" ? raw.snapshot : raw;
+          if (!snapshot || typeof snapshot !== "object" || !snapshot.account_state || typeof snapshot.account_state !== "object" || !Array.isArray(snapshot.positions) || !Array.isArray(snapshot.orders)) return json({ error: "invalid_snapshot_response" }, 502);
+          const accountState = snapshot.account_state;
+          return json({
+            account_id: row.account_id,
+            currency: account?.settings?.currency ?? null,
+            account_status: account?.settings?.account_status ?? null,
+            trade_mode: account?.settings?.trade_mode ?? null,
+            account_state: accountState,
+            positions: snapshot.positions,
+            orders: snapshot.orders,
+            position_count: snapshot.positions.length,
+            order_count: snapshot.orders.length,
+            snapshot_status: "read_only_success",
+            trading: "disabled",
+            note: "Live account state is read-only. No orders or positions were changed."
+          });
+        } catch (e) {
+          return json({ error: "account_snapshot_request_failed", detail: e instanceof Error ? e.message : "unknown" }, 502);
+        }
+      }
       if (req.method === "POST" && url.pathname.startsWith("/api/exness/connections/") && url.pathname.endsWith("/validate")) {
         const id = url.pathname.split("/")[4];
         if (!id) return json({ error: "missing_connection_id" }, 400);
@@ -113,7 +166,7 @@ export default {
         if (!id) return json({ error: "missing_connection_id" }, 400);
         const row = await env.DB.prepare("SELECT api_key_id,account_id,gateway_origin,private_key_ciphertext,private_key_iv FROM exness_connections WHERE id=? AND user_id=?").bind(id, claims.sub).first<any>();
         if (!row) return json({ error: "connection_not_found" }, 404);
-        if (!/^\\d{1,20}$/.test(row.account_id) || BigInt(row.account_id) > 18446744073709551615n) return json({ error: "invalid_account_id" }, 400);
+        if (!/^\d{1,20}$/.test(row.account_id) || BigInt(row.account_id) > 18446744073709551615n) return json({ error: "invalid_account_id" }, 400);
         try {
           const privateKey = await decrypt(row.private_key_ciphertext, row.private_key_iv, env);
           const path = "/v1/trading/access-point?account_id=" + encodeURIComponent(row.account_id);
