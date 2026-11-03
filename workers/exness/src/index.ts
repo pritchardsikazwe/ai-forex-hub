@@ -7,6 +7,7 @@ export interface Env {
   SUPABASE_URL: string;
   SUPABASE_PUBLISHABLE_KEY: string;
   EXNESS_API_BASE_URL?: string;
+  EXNESS_PRIVATE_SIGNING_KEY?: string;
 }
 type Claims = { sub: string; exp: number; iss?: string; aud?: string };
 
@@ -61,8 +62,10 @@ export default {
       if (req.method === "POST" && url.pathname === "/api/exness/connections") {
         let body: any;
         try { body = await req.json(); } catch { return json({ error: "invalid_json" }, 400); }
-        const { apiKeyId, privateSigningKey, accountId, gateway } = body ?? {};
-        if (![apiKeyId, privateSigningKey, accountId, gateway].every(v => typeof v === "string" && v.trim())) return json({ error: "apiKeyId, privateSigningKey, accountId and gateway are required" }, 400);
+        const { apiKeyId, accountId, gateway } = body ?? {};
+        const privateSigningKey = env.EXNESS_PRIVATE_SIGNING_KEY;
+        if (![apiKeyId, accountId, gateway].every(v => typeof v === "string" && v.trim())) return json({ error: "apiKeyId, accountId and gateway are required" }, 400);
+        if (typeof privateSigningKey !== "string" || !privateSigningKey.trim()) return json({ error: "exness_signing_secret_not_configured" }, 503);
         if (apiKeyId.length > 256 || accountId.length > 128 || privateSigningKey.length > 12000) return json({ error: "input_too_large" }, 413);
         let origin: string;
         try { origin = safeGateway(gateway); } catch { return json({ error: "invalid_gateway_origin" }, 400); }
@@ -186,6 +189,48 @@ export default {
         } catch (e) {
           return json({ error: "discovery_request_failed", detail: e instanceof Error ? e.message : "unknown" }, 502);
         }
+      }
+      // Persist robot preferences only. This endpoint does not start a trading process.
+      if (url.pathname === "/api/robot/settings" && req.method === "GET") {
+        const row = await env.DB.prepare("SELECT enabled,strategies_json,risk_per_trade,daily_loss_limit,updated_at FROM robot_settings WHERE user_id=?").bind(claims.sub).first<any>();
+        return json(row ? {
+          enabled: row.enabled === 1,
+          strategies: JSON.parse(row.strategies_json),
+          riskPerTrade: row.risk_per_trade,
+          dailyLossLimit: row.daily_loss_limit,
+          updatedAt: row.updated_at,
+          execution: "disabled"
+        } : {
+          enabled: false,
+          strategies: { scalping: false, dayTrading: true, swingTrading: false },
+          riskPerTrade: 1,
+          dailyLossLimit: 3,
+          updatedAt: null,
+          execution: "disabled"
+        });
+      }
+      if (url.pathname === "/api/robot/settings" && req.method === "PUT") {
+        let body: any;
+        try { body = await req.json(); } catch { return json({ error: "invalid_json" }, 400); }
+        const risk = Number(body?.riskPerTrade);
+        const loss = Number(body?.dailyLossLimit);
+        const strategies = body?.strategies;
+        if (!Number.isFinite(risk) || risk < 0.1 || risk > 2 || !Number.isFinite(loss) || loss < 0.5 || loss > 3 ||
+            !strategies || typeof strategies !== "object" ||
+            !["scalping", "dayTrading", "swingTrading"].every(k => typeof strategies[k] === "boolean") ||
+            !Object.values(strategies).some(v => v === true)) {
+          return json({ error: "invalid_robot_settings", limits: { riskPerTrade: [0.1, 2], dailyLossLimit: [0.5, 3], atLeastOneStrategy: true } }, 422);
+        }
+        const now = new Date().toISOString();
+        await env.DB.prepare("INSERT INTO robot_settings (user_id,enabled,strategies_json,risk_per_trade,daily_loss_limit,updated_at) VALUES (?,0,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET strategies_json=excluded.strategies_json,risk_per_trade=excluded.risk_per_trade,daily_loss_limit=excluded.daily_loss_limit,updated_at=excluded.updated_at")
+          .bind(claims.sub, JSON.stringify(strategies), risk, loss, now).run();
+        return json({ saved: true, enabled: false, strategies, riskPerTrade: risk, dailyLossLimit: loss, updatedAt: now, execution: "disabled", message: "Settings saved. The robot remains stopped; execution is not enabled." });
+      }
+      if (url.pathname === "/api/robot/emergency-stop" && req.method === "POST") {
+        const now = new Date().toISOString();
+        await env.DB.prepare("INSERT INTO robot_settings (user_id,enabled,strategies_json,risk_per_trade,daily_loss_limit,updated_at) VALUES (?,0,'{\\"scalping\\":false,\\"dayTrading\\":true,\\"swingTrading\\":false}',1,3,?) ON CONFLICT(user_id) DO UPDATE SET enabled=0,updated_at=excluded.updated_at")
+          .bind(claims.sub, now).run();
+        return json({ stopped: true, enabled: false, execution: "disabled", message: "Robot settings disabled. This does not close existing broker positions." });
       }
       if (req.method === "GET" && url.pathname === "/api/exness/connections") {
         const rows = await env.DB.prepare("SELECT id,account_id,gateway_origin,environment,status,created_at FROM exness_connections WHERE user_id=? ORDER BY created_at DESC").bind(claims.sub).all();
