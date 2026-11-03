@@ -92,7 +92,7 @@ function App({accessToken,userEmail,onSignOut}:{accessToken:string;userEmail:str
  const [brokerNotice,setBrokerNotice]=useState('The Exness connection, live trading and automated trading integrations are still under development. This website is not connected to a live trading account; all trading controls are previews only.')
  const choose=(s:Section)=>{setSection(s);setMobileOpen(false);setActiveCourse('')}
  const title=section==='Overview'?'Your trading journey, in focus':section==='Leaderboard'?'Weekly trading contest':section==='Broker terminal'?'Connect and manage your Exness account':section==='Academy'?'Build your trading knowledge':section==='Market insights'?'Understand the markets':section==='Partner centre'?'Your partner workspace':'Account settings'
- return <div className={section==='Leaderboard'?'app-shell leaderboard-mode':'app-shell'}>
+ return <div className={section==='Leaderboard'?'app-shell leaderboard-mode':section==='Broker terminal'?'app-shell broker-mode':'app-shell'}>
   <header className="topbar">
    <a className="brand" href="#" onClick={e=>{e.preventDefault();choose('Overview')}}><span className="brand-mark"><Activity size={21}/></span><span>AI FOREX<span className="brand-light">HUB</span><small>LEARN • GROW • TRADE SMARTER</small></span></a>
    <nav className="desktop-nav">{nav.map(n=><button key={n.label} className={section===n.label?'nav-link active':'nav-link'} onClick={()=>choose(n.label)}>{n.label}</button>)}</nav>
