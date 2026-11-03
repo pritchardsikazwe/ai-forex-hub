@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Trophy, Medal, Crown, CalendarDays, Activity, ArrowDownRight, ArrowUpRight, BookOpen, ChevronDown, CircleHelp, Clock3, ExternalLink, GraduationCap, LayoutDashboard, Menu, Search, ShieldCheck, Sparkles, TrendingUp, Users, Wallet, X, Play, LockKeyhole, Globe2, Bell, CheckCircle2, LogOut, ChartNoAxesCombined } from 'lucide-react'
+import { Trophy, Medal, Crown, CalendarDays, Activity, ArrowDownRight, ArrowUpRight, BookOpen, ChevronDown, CircleHelp, Clock3, ExternalLink, GraduationCap, LayoutDashboard, Menu, Search, ShieldCheck, Sparkles, TrendingUp, Users, Wallet, X, Play, LockKeyhole, Globe2, Bell, CheckCircle2, LogOut, ChartNoAxesCombined, MessageCircle } from 'lucide-react'
 
 type Section = 'Overview' | 'Leaderboard' | 'Broker terminal' | 'Academy' | 'Market insights' | 'Partner centre' | 'My account'
 const nav: {label: Section; icon: typeof LayoutDashboard}[] = [
