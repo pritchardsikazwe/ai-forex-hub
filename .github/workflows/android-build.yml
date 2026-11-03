@@ -24,39 +24,68 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - name: Install dependencies
         run: npm install
-
       - name: Build web app
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-
       - name: Add Android platform
         run: npx cap add android
-
-      - name: Generate native icons from official Kopela logo
+      - name: Generate native icons from Kopela logo
         run: |
           npm run android:icons
           npx capacitor-assets generate --android
-
       - name: Sync native project
         run: npx cap sync android
-
-      - name: Build installable APK and Play Store bundle
+      - name: Configure signing when secrets exist
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/kopela-upload.jks"
+          cat >> android/gradle.properties <<EOF
+          KOP_ALLOW_RELEASE_SIGNING=true
+          KOP_STORE_FILE=$RUNNER_TEMP/kopela-upload.jks
+          KOP_STORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD
+          KOP_KEY_ALIAS=$ANDROID_KEY_ALIAS
+          KOP_KEY_PASSWORD=$ANDROID_KEY_PASSWORD
+          EOF
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android/app/build.gradle')
+          s=p.read_text()
+          s=s.replace('    buildTypes {', '''    signingConfigs {
+          release {
+              if (project.hasProperty('KOP_ALLOW_RELEASE_SIGNING')) {
+                  storeFile file(KOP_STORE_FILE)
+                  storePassword KOP_STORE_PASSWORD
+                  keyAlias KOP_KEY_ALIAS
+                  keyPassword KOP_KEY_PASSWORD
+              }
+          }
+      }
+      buildTypes {''')
+          s=s.replace('            minifyEnabled false', '''            minifyEnabled false
+              if (project.hasProperty('KOP_ALLOW_RELEASE_SIGNING')) {
+                  signingConfig signingConfigs.release
+              }''')
+          p.write_text(s)
+          PY
+      - name: Build APK and AAB
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug bundleRelease
-
       - name: Upload Android outputs
         uses: actions/upload-artifact@v4
         with:
