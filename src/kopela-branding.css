@@ -16,3 +16,42 @@
 @media(prefers-reduced-motion:reduce){.broker-mode .brand-mark,.broker-mode .robot-home-hero *{animation:none!important;transition:none!important}}
 
 .broker-mode .brand-mark img{display:block;width:100%;height:100%;max-width:39px;max-height:39px;object-fit:cover;border-radius:11px}
+
+/* Native app ergonomics: touch-sized controls and compact phone layout. */
+@media (max-width: 760px) {
+  .broker-mode { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .broker-mode button, .broker-mode input, .broker-mode select, .broker-mode a {
+    min-height: 44px;
+  }
+  .broker-mode .desktop-nav { display: none; }
+  .broker-mode .mobile-nav, .broker-mode .mobile-menu { display: flex; }
+  .robot-app { width: 100%; min-width: 0; padding: 12px; }
+  .robot-topline { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+  .robot-topline h2 { font-size: clamp(1.45rem, 7vw, 2rem); line-height: 1.15; }
+  .robot-topline p { font-size: 14px; line-height: 1.5; }
+  .robot-toggle { align-self: flex-start; min-height: 44px; }
+  .robot-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .robot-metrics > div { min-width: 0; padding: 14px; }
+  .robot-metrics > div:last-child { grid-column: 1 / -1; }
+  .robot-metrics b { font-size: clamp(1.15rem, 5vw, 1.5rem); overflow-wrap: anywhere; }
+  .robot-layout { display: flex; flex-direction: column; gap: 14px; }
+  .robot-primary, .robot-side { width: 100%; min-width: 0; }
+  .robot-card { padding: 15px; border-radius: 18px; }
+  .robot-card-head { flex-wrap: wrap; gap: 10px; }
+  .robot-card-head h3 { font-size: 1.05rem; }
+  .robot-tabs { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .robot-tabs button { min-width: 0; padding: 8px 5px; font-size: 12px; }
+  .robot-strategies { display: grid; grid-template-columns: 1fr; gap: 9px; }
+  .robot-strategy { min-height: 64px; width: 100%; padding: 12px; text-align: left; }
+  .robot-strategy small { line-height: 1.4; }
+  .robot-action, .robot-emergency { width: 100%; min-height: 48px; justify-content: center; }
+  .account-connect label, .robot-risk-edit label { display: block; width: 100%; }
+  .account-connect input, .account-connect select, .robot-risk-edit input { width: 100%; min-height: 46px; font-size: 16px; }
+  .robot-empty { min-height: 190px; padding: 20px 12px; text-align: center; }
+  .robot-disclaimer { align-items: flex-start; font-size: 12px; line-height: 1.5; }
+}
+@media (max-width: 380px) {
+  .robot-metrics { grid-template-columns: 1fr; }
+  .robot-metrics > div:last-child { grid-column: auto; }
+  .robot-card { padding: 12px; }
+}
