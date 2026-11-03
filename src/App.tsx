@@ -123,7 +123,7 @@ function App({accessToken,userEmail,onSignOut}:{accessToken:string;userEmail:str
  const title=section==='Broker terminal'?'AI Robot': 'Account settings'
  return <div className={section==='Broker terminal'?'app-shell broker-mode':'app-shell'}>
   <header className="topbar">
-   <a className="brand" href="#" onClick={e=>{e.preventDefault();choose('Overview')}}><span className="brand-mark"><Activity size={21}/></span><span>AI FOREX<span className="brand-light">HUB</span><small>LEARN • GROW • TRADE SMARTER</small></span></a>
+   <a className="brand" href="#" onClick={e=>{e.preventDefault();choose('Broker terminal')}}><span className="brand-mark"><Activity size={21}/></span><span>AI FOREX<span className="brand-light">HUB</span><small>LEARN • GROW • TRADE SMARTER</small></span></a>
    <nav className="desktop-nav">{nav.map(n=><button key={n.label} className={section===n.label?'nav-link active':'nav-link'} onClick={()=>choose(n.label)}>{n.label}</button>)}</nav>
    <div className="top-actions"><button className="icon-button" aria-label="Help"><CircleHelp size={18}/></button><button className="icon-button notification" aria-label="Notifications"><Bell size={18}/><i/></button><button className="profile-chip" onClick={()=>choose('My account')}><span className="avatar">PS</span><span className="profile-name">{userEmail||"My workspace"}</span><ChevronDown size={15}/></button><button className="icon-button" title="Sign out" aria-label="Sign out" onClick={onSignOut}><LogOut size={17}/></button><button className="mobile-menu icon-button" onClick={()=>setMobileOpen(!mobileOpen)} aria-label="Toggle menu">{mobileOpen?<X/>:<Menu/>}</button></div>
   </header>
