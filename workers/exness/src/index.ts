@@ -228,8 +228,8 @@ export default {
       }
       if (url.pathname === "/api/robot/emergency-stop" && req.method === "POST") {
         const now = new Date().toISOString();
-        await env.DB.prepare("INSERT INTO robot_settings (user_id,enabled,strategies_json,risk_per_trade,daily_loss_limit,updated_at) VALUES (?,0,'{\\"scalping\\":false,\\"dayTrading\\":true,\\"swingTrading\\":false}',1,3,?) ON CONFLICT(user_id) DO UPDATE SET enabled=0,updated_at=excluded.updated_at")
-          .bind(claims.sub, now).run();
+        await env.DB.prepare("INSERT INTO robot_settings (user_id,enabled,strategies_json,risk_per_trade,daily_loss_limit,updated_at) VALUES (?,0,?,1,3,?) ON CONFLICT(user_id) DO UPDATE SET enabled=0,updated_at=excluded.updated_at")
+          .bind(claims.sub, JSON.stringify({ scalping: false, dayTrading: true, swingTrading: false }), now).run();
         return json({ stopped: true, enabled: false, execution: "disabled", message: "Robot settings disabled. This does not close existing broker positions." });
       }
       if (req.method === "GET" && url.pathname === "/api/exness/connections") {
