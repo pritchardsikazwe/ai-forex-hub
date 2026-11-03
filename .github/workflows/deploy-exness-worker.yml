@@ -19,7 +19,7 @@ jobs:
         working-directory: workers/exness
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Apply D1 migrations
