@@ -7,6 +7,7 @@ on:
     paths:
       - 'src/**'
       - 'public/**'
+      - 'scripts/**'
       - 'index.html'
       - 'package.json'
       - 'bun.lockb'
@@ -41,6 +42,11 @@ jobs:
 
       - name: Add Android platform
         run: npx cap add android
+
+      - name: Generate native icons from official Kopela logo
+        run: |
+          npm run android:icons
+          npx capacitor-assets generate --android
 
       - name: Sync native project
         run: npx cap sync android
