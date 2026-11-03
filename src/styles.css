@@ -328,3 +328,9 @@
 .footer-disclaimer{max-width:760px;font-size:10px;line-height:1.7;color:#9ba9bc}
 .footer-disclaimer b{color:#e6c75b}
 @media(max-width:760px){.footer-disclaimer{font-size:9px}}
+
+/* Fixed WhatsApp contact action */
+.kopela-whatsapp-float{position:fixed;z-index:1000;right:22px;bottom:22px;display:flex;align-items:center;gap:10px;padding:13px 17px;border-radius:999px;background:#20c56b;color:#fff;text-decoration:none;font-size:12px;font-weight:850;box-shadow:0 9px 28px #0005;border:1px solid #61e79a;transition:transform .2s,box-shadow .2s}
+.kopela-whatsapp-float:hover{transform:translateY(-3px);box-shadow:0 13px 34px #20c56b55}
+.kopela-whatsapp-float svg{flex-shrink:0}
+@media(max-width:600px){.kopela-whatsapp-float{right:13px;bottom:14px;padding:12px 14px}.kopela-whatsapp-float span{font-size:11px}}
