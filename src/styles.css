@@ -79,3 +79,36 @@
 .broker-mode .broker-notice,.broker-mode .market-disclaimer{background:#1b202b;border:1px solid #51432a;color:#d6bd7b;border-radius:12px}.broker-mode .connection-hero{background:#101c2b;border-color:#2b4056}.broker-mode .connection-hero b{color:#f2f5fa}.broker-mode .connection-hero small{color:#93a5bb}.broker-mode .broker-checklist{color:#c5d0df}.broker-mode .broker-checklist svg{color:#4bd39b}.broker-mode .mode-option{background:#0b1322;border-color:#2c3a51;color:#dce5f2}.broker-mode .mode-option.active{background:#14251f;border-color:#2f9a72}.broker-mode .mode-option small{color:#91a0b6}.broker-mode .mode-option svg{color:#49d29a}.broker-mode .field-label{color:#b9c5d8}.broker-mode .tab{background:#0b1322;color:#aab6ca;border-color:#2e3c54}.broker-mode .tab.active{background:#26301e;color:#f2ce4f;border-color:#76622b}
 .broker-mode .snapshot-summary>div{background:#0b1424;border-color:#2b3a52}.broker-mode .snapshot-summary small{color:#92a2b9}.broker-mode .snapshot-summary b{color:#f0f4fa}.broker-mode .snapshot-result{border-color:#2c3a50}.broker-mode .snapshot-result pre{background:#060b14;color:#a8f0cc;border:1px solid #26354a}.broker-mode .snapshot-error{background:#321d27;color:#ffb8c0;border:1px solid #63313d}.broker-mode .snapshot-success{background:#102a23;color:#8ce8bd;border-color:#245d49}.broker-mode .service-logo{background:#282213;color:#f3c63c}.broker-mode .footer{border-color:#293149;color:#8c98ad}.broker-mode .footer-brand{color:#c8d0df}
 @media(max-width:760px){.broker-mode .main-wrap{padding:20px 14px 0}.broker-mode .mobile-nav{background:#0b1020;border-color:#273044}.broker-mode .mobile-nav button{color:#aab3c5}.broker-mode .mobile-nav button.selected{background:#24291f;color:#f3c83e}.broker-mode .page-heading h1{font-size:26px}}
+
+/* Focused robot-app shell: compact chrome, no marketing-site feel */
+.broker-mode .topbar{height:64px;padding:0 22px;gap:22px}
+.broker-mode .brand small{display:none}
+.broker-mode .desktop-nav{gap:6px}
+.broker-mode .nav-link{height:38px;padding:0 13px;font-size:12px;border-radius:10px}
+.broker-mode .main-wrap{max-width:1320px;padding:18px 22px 24px}
+.broker-mode .breadcrumb{font-size:10px}
+.broker-mode .page-heading{margin:18px 0 16px;align-items:center}
+.broker-mode .heading-actions .button-outline{display:none}
+.broker-mode .heading-actions .button-primary{padding:10px 12px}
+.broker-mode .onboarding-panel,.broker-mode .snapshot-panel,.broker-mode .broker-main,.broker-mode .broker-settings{border-radius:15px;box-shadow:0 10px 28px #0003}
+.broker-mode .button{transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+.broker-mode .button:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.broker-mode .status-wait{border-radius:20px}
+.broker-mode .footer{display:none}
+@media(max-width:760px){
+ .broker-mode .topbar{height:58px;padding:0 12px;gap:8px}
+ .broker-mode .desktop-nav{display:flex;flex:1;justify-content:flex-end}
+ .broker-mode .nav-link{height:34px;padding:0 10px;font-size:11px}
+ .broker-mode .top-actions{gap:4px}
+ .broker-mode .profile-name,.broker-mode .top-actions>.icon-button:not(.mobile-menu){display:none}
+ .broker-mode .main-wrap{padding:12px 10px 20px}
+ .broker-mode .breadcrumb{gap:6px}
+ .broker-mode .page-heading{margin:14px 0;gap:8px}
+ .broker-mode .page-heading p{max-width:250px;font-size:11px;line-height:1.45}
+ .broker-mode .heading-actions .button-primary{font-size:10px;padding:9px}
+ .broker-mode .onboarding-panel,.broker-mode .snapshot-panel{padding:14px}
+ .broker-mode .snapshot-form{gap:12px}
+ .broker-mode .snapshot-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .broker-mode .broker-grid{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.broker-mode *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
