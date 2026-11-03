@@ -231,3 +231,47 @@
  .broker-mode .page-heading{border-bottom:0;padding-bottom:0}
  .broker-mode .robot-metrics>div:before{height:1px}
 }
+
+
+/* Animated AI robot home hero — clean, premium, restrained motion */
+.broker-mode .welcome-card{
+ position:relative;isolation:isolate;overflow:hidden;
+ background:radial-gradient(ellipse at 78% 32%,#153b3a 0,transparent 38%),linear-gradient(120deg,#101a2d 0%,#0b1220 68%,#101b2b 100%);
+ border:1px solid #2b4054;border-radius:22px;box-shadow:0 18px 48px #0003;
+}
+.broker-mode .welcome-card:before{
+ content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.22;
+ background-image:linear-gradient(#3bd6a012 1px,transparent 1px),linear-gradient(90deg,#3bd6a012 1px,transparent 1px);
+ background-size:34px 34px;mask-image:linear-gradient(90deg,transparent 12%,#000 100%);
+ animation:robotGridDrift 18s linear infinite;
+}
+.broker-mode .welcome-art{position:relative;min-height:290px;overflow:visible;perspective:900px}
+.broker-mode .welcome-art:before{
+ content:"";position:absolute;right:8%;top:4%;width:210px;height:210px;border:1px solid #39d6a044;border-radius:50%;
+ box-shadow:0 0 0 24px #39d6a00a,0 0 0 48px #39d6a008;animation:robotOrbitFloat 7s ease-in-out infinite;
+}
+.broker-mode .welcome-art:after{
+ content:"";position:absolute;right:calc(8% + 57px);top:66px;width:96px;height:84px;border:1px solid #5ce4ba;
+ border-radius:24px 24px 30px 30px;background:linear-gradient(145deg,#1b3941,#0b1826);
+ box-shadow:inset 0 0 22px #39d6a01e,0 0 35px #39d6a01a;
+ animation:robotHeadBob 4s ease-in-out infinite;
+}
+.broker-mode .welcome-art .chart-float{position:absolute;z-index:2;right:0;bottom:8px;transform:translateZ(35px);animation:robotChartFloat 6s ease-in-out infinite}
+.broker-mode .welcome-art .chart-float:before{
+ content:"";position:absolute;right:28px;top:-26px;width:10px;height:10px;border-radius:50%;background:#f0c64a;
+ box-shadow:0 0 18px #f0c64a;animation:robotSignalBlink 2.4s ease-in-out infinite;
+}
+.broker-mode .welcome-art .orb{animation:robotOrbDrift 8s ease-in-out infinite}
+.broker-mode .welcome-art .orb-two{animation-delay:-3.5s}
+.broker-mode .welcome-content{position:relative;z-index:3}
+.broker-mode .welcome-content h2{letter-spacing:-.045em}
+.broker-mode .welcome-card .button-gold{box-shadow:0 8px 26px #e9bd381e;transition:transform .2s,box-shadow .2s}
+.broker-mode .welcome-card .button-gold:hover{transform:translateY(-2px);box-shadow:0 12px 32px #e9bd3833}
+@keyframes robotGridDrift{to{background-position:34px 34px}}
+@keyframes robotOrbitFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(5deg)}}
+@keyframes robotHeadBob{0%,100%{transform:translateY(0) rotateY(-5deg)}50%{transform:translateY(-8px) rotateY(5deg)}}
+@keyframes robotChartFloat{0%,100%{transform:translateY(0) translateZ(35px)}50%{transform:translateY(-7px) translateZ(35px)}}
+@keyframes robotOrbDrift{0%,100%{transform:translate(0,0)}50%{transform:translate(12px,-14px)}}
+@keyframes robotSignalBlink{0%,100%{opacity:.45;transform:scale(.8)}50%{opacity:1;transform:scale(1.25)}}
+@media(max-width:760px){.broker-mode .welcome-art{min-height:220px}.broker-mode .welcome-art:before{width:160px;height:160px;right:2%}.broker-mode .welcome-art:after{right:calc(2% + 40px);top:48px;width:78px;height:70px}.broker-mode .welcome-art .chart-float{max-width:100%;right:-5px}}
+@media(prefers-reduced-motion:reduce){.broker-mode .welcome-art:before,.broker-mode .welcome-art:after,.broker-mode .welcome-art .chart-float,.broker-mode .welcome-art .orb,.broker-mode .welcome-art .orb-two,.broker-mode .welcome-art .chart-float:before,.broker-mode .welcome-card:before{animation:none!important}}
