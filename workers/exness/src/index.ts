@@ -7,6 +7,7 @@ export interface Env {
   SUPABASE_URL: string;
   SUPABASE_PUBLISHABLE_KEY: string;
   EXNESS_API_BASE_URL?: string;
+  EXNESS_PRIVATE_SIGNING_KEY?: string;
 }
 type Claims = { sub: string; exp: number; iss?: string; aud?: string };
 
@@ -61,8 +62,10 @@ export default {
       if (req.method === "POST" && url.pathname === "/api/exness/connections") {
         let body: any;
         try { body = await req.json(); } catch { return json({ error: "invalid_json" }, 400); }
-        const { apiKeyId, privateSigningKey, accountId, gateway } = body ?? {};
-        if (![apiKeyId, privateSigningKey, accountId, gateway].every(v => typeof v === "string" && v.trim())) return json({ error: "apiKeyId, privateSigningKey, accountId and gateway are required" }, 400);
+        const { apiKeyId, accountId, gateway } = body ?? {};
+        const privateSigningKey = env.EXNESS_PRIVATE_SIGNING_KEY;
+        if (![apiKeyId, accountId, gateway].every(v => typeof v === "string" && v.trim())) return json({ error: "apiKeyId, accountId and gateway are required" }, 400);
+        if (typeof privateSigningKey !== "string" || !privateSigningKey.trim()) return json({ error: "exness_signing_secret_not_configured" }, 503);
         if (apiKeyId.length > 256 || accountId.length > 128 || privateSigningKey.length > 12000) return json({ error: "input_too_large" }, 413);
         let origin: string;
         try { origin = safeGateway(gateway); } catch { return json({ error: "invalid_gateway_origin" }, 400); }
