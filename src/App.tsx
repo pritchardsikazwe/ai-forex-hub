@@ -3,8 +3,7 @@ import { Trophy, Medal, Crown, CalendarDays, Activity, ArrowDownRight, ArrowUpRi
 
 type Section = 'Overview' | 'Leaderboard' | 'Broker terminal' | 'Academy' | 'Market insights' | 'Partner centre' | 'My account'
 const nav: {label: Section; icon: typeof LayoutDashboard}[] = [
-  { label: 'Overview', icon: LayoutDashboard }, { label: 'Leaderboard', icon: Trophy }, { label: 'Broker terminal', icon: Activity }, { label: 'Academy', icon: GraduationCap },
-  { label: 'Market insights', icon: ChartNoAxesCombined }, { label: 'Partner centre', icon: Users }, { label: 'My account', icon: Wallet }
+  { label: 'Broker terminal', icon: Activity }, { label: 'My account', icon: Wallet }
 ]
 const approvedInstruments = [
   {symbol:'EURUSDm',category:'Forex',name:'Euro / US Dollar'},
@@ -25,7 +24,7 @@ const courses = [
   {level:'RISK MANAGEMENT',title:'Protecting your capital',desc:'Position sizing, risk-to-reward and practical rules for disciplined trading.',progress:0,lessons:'0 of 7 lessons',time:'1h 50m'}
 ]
 function App({accessToken,userEmail,onSignOut}:{accessToken:string;userEmail:string;onSignOut:()=>void}){
- const [section,setSection]=useState<Section>('Overview')
+ const [section,setSection]=useState<Section>('Broker terminal')
  const [mobileOpen,setMobileOpen]=useState(false)
  const [notice,setNotice]=useState('This workspace is running with sample data. Connect your services to enable live account and partner reporting.')
  const [search,setSearch]=useState('')
@@ -91,8 +90,8 @@ function App({accessToken,userEmail,onSignOut}:{accessToken:string;userEmail:str
  }
  const [brokerNotice,setBrokerNotice]=useState('The Exness connection, live trading and automated trading integrations are still under development. This website is not connected to a live trading account; all trading controls are previews only.')
  const choose=(s:Section)=>{setSection(s);setMobileOpen(false);setActiveCourse('')}
- const title=section==='Overview'?'Your trading journey, in focus':section==='Leaderboard'?'Weekly trading contest':section==='Broker terminal'?'Connect and manage your Exness account':section==='Academy'?'Build your trading knowledge':section==='Market insights'?'Understand the markets':section==='Partner centre'?'Your partner workspace':'Account settings'
- return <div className={section==='Leaderboard'?'app-shell leaderboard-mode':section==='Broker terminal'?'app-shell broker-mode':'app-shell'}>
+ const title=section==='Broker terminal'?'AI Robot': 'Account settings'
+ return <div className={section==='Broker terminal'?'app-shell broker-mode':'app-shell'}>
   <header className="topbar">
    <a className="brand" href="#" onClick={e=>{e.preventDefault();choose('Overview')}}><span className="brand-mark"><Activity size={21}/></span><span>AI FOREX<span className="brand-light">HUB</span><small>LEARN • GROW • TRADE SMARTER</small></span></a>
    <nav className="desktop-nav">{nav.map(n=><button key={n.label} className={section===n.label?'nav-link active':'nav-link'} onClick={()=>choose(n.label)}>{n.label}</button>)}</nav>
@@ -100,8 +99,8 @@ function App({accessToken,userEmail,onSignOut}:{accessToken:string;userEmail:str
   </header>
   {mobileOpen&&<div className="mobile-nav">{nav.map(n=><button key={n.label} onClick={()=>choose(n.label)} className={section===n.label?'selected':''}><n.icon size={18}/>{n.label}</button>)}</div>}
   <main className="main-wrap">
-   <div className="breadcrumb"><span>Workspace</span><span>/</span><b>{section}</b><span className="demo-pill"><i/> DEMO WORKSPACE</span></div>
-   <div className="page-heading"><div><div className="eyebrow">KOPELA / {section.toUpperCase()}</div><h1>{title}</h1><p>{section==='Overview'?'A clear view of your learning, market watchlist and partner activity.':section==='Academy'?'Structured lessons to help you make informed, independent trading decisions.':section==='Market insights'?'A learning-focused market watchlist. Prices below are illustrative, not live quotes.':section==='Partner centre'?'Manage your referral journey and access partner resources.': 'Manage your personal details and connected services.'}</p></div><div className="heading-actions"><button className="button button-outline" onClick={()=>setNotice('Help centre is being prepared. Contact support once your workspace is connected.')}><CircleHelp size={16}/> Help centre</button><button className="button button-primary" onClick={()=>choose('Academy')}><BookOpen size={16}/> Continue learning</button></div></div>
+   <div className="breadcrumb"><span>AI ROBOT</span><span>/</span><b>{section}</b><span className="demo-pill"><i/> ROBOT WORKSPACE</span></div>
+   <div className="page-heading"><div><div className="eyebrow">AI FOREX HUB / AUTOMATION</div><h1>{title}</h1><p>{section==='Broker terminal'?'Verify your account, choose a strategy, and let the robot scan within your risk settings.':'Manage your profile and connected trading account.'}</p></div><div className="heading-actions"><button className="button button-outline" onClick={()=>setNotice('Help centre is being prepared. Contact support once your workspace is connected.')}><CircleHelp size={16}/> Help centre</button><button className="button button-primary" onClick={()=>choose('Academy')}><BookOpen size={16}/> Continue learning</button></div></div>
    {showNotice&&section!=='Leaderboard'&&<div className="notice"><span className="notice-icon"><Sparkles size={17}/></span><span>{notice}</span><button onClick={()=>setShowNotice(false)} aria-label="Dismiss"><X size={16}/></button></div>}
    {section==='Overview'&&<><section className="welcome-grid"><div className="welcome-card"><div className="welcome-content"><div className="live-label"><span/> YOUR LEARNING SPACE</div><h2>Make your next move<br/>an informed one.</h2><p>Learn the foundations, practise your analysis and develop a trading routine built around risk awareness.</p><button className="button button-gold" onClick={()=>choose('Academy')}>Explore the academy <ArrowUpRight size={16}/></button></div><div className="welcome-art"><div className="orb orb-one"/><div className="orb orb-two"/><div className="chart-float"><div className="chart-caption">MARKET STRUCTURE <span>EDUCATION</span></div><svg viewBox="0 0 300 150" role="img" aria-label="Illustrative rising market chart"><defs><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#39d6a0" stopOpacity=".3"/><stop offset="1" stopColor="#39d6a0" stopOpacity="0"/></linearGradient></defs><path d="M0 120 L35 98 60 108 88 73 116 88 148 52 176 67 205 35 232 49 265 17 300 25 L300 150 L0 150Z" fill="url(#area)"/><path d="M0 120 L35 98 60 108 88 73 116 88 148 52 176 67 205 35 232 49 265 17 300 25" fill="none" stroke="#43d9a4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg><div className="chart-foot"><span>Illustrative chart</span><span>Not a trade signal</span></div></div></div></div><div className="side-promo"><div className="promo-icon"><GraduationCap size={22}/></div><span className="eyebrow">START HERE</span><h3>New to forex?</h3><p>Start with the essentials before exploring advanced concepts.</p><button className="text-link" onClick={()=>choose('Academy')}>View beginner path <ArrowUpRight size={15}/></button><div className="promo-bottom"><span>11 lessons</span><span>•</span><span>Beginner friendly</span></div></div></section>
     <section className="stat-grid"><Stat icon={BookOpen} label="Courses in progress" value="2" note="Keep your momentum" color="mint"/><Stat icon={Clock3} label="Learning time" value="4.5 hrs" note="Across your courses" color="blue"/><Stat icon={TrendingUp} label="Watchlist pairs" value="6" note="Illustrative watchlist" color="gold"/><Stat icon={ShieldCheck} label="Account status" value="Not connected" note="Connect when ready" color="violet"/></section>
