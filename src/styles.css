@@ -320,3 +320,11 @@
 @media(max-width:900px){.quick-robot-cta{padding:9px 10px}.quick-robot-cta svg{display:none}.robot-home-hero{padding:28px;grid-template-columns:1fr .65fr}.robot-home-visual{min-height:210px}}
 @media(max-width:650px){.broker-mode .top-actions{gap:5px}.quick-robot-cta{padding:9px 8px;font-size:10px}.quick-robot-cta svg{display:block;width:12px}.robot-home-hero{grid-template-columns:1fr;padding:25px 21px;gap:0}.robot-home-copy h2{font-size:32px}.robot-home-visual{min-height:190px;max-height:200px}.robot-core{width:85px;height:85px;border-radius:24px}.robot-core svg{width:36px}.robot-orbit{width:175px;height:80px}.robot-orbit.orbit-b{width:145px;height:180px}.robot-satellite.sat-a{left:22%;top:12%}.robot-satellite.sat-b{right:15%;top:36%}.robot-satellite.sat-c{left:25%;bottom:8%}}
 @media(prefers-reduced-motion:reduce){.robot-home-hero *{animation:none!important;transition:none!important}}
+
+/* Kopela AI Trader branding and clear independent-service disclosure */
+.broker-mode .brand{letter-spacing:.055em}
+.broker-mode .brand-light{color:#e9b62d}
+.broker-mode .brand small{display:block!important;color:#a6b4c8;font-size:8px;letter-spacing:.14em;margin-top:4px}
+.footer-disclaimer{max-width:760px;font-size:10px;line-height:1.7;color:#9ba9bc}
+.footer-disclaimer b{color:#e6c75b}
+@media(max-width:760px){.footer-disclaimer{font-size:9px}}
