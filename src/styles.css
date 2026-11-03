@@ -287,3 +287,36 @@
 .broker-mode .account-clean-actions .robot-action{width:auto;min-width:210px;margin:0;padding:12px 16px}
 .broker-mode .account-clean-actions .robot-emergency{width:auto;margin:0;padding:12px 16px}
 @media(max-width:620px){.broker-mode .account-clean-panel{padding:15px}.broker-mode .account-clean-details{grid-template-columns:1fr}.broker-mode .account-clean-actions{display:grid;grid-template-columns:1fr}.broker-mode .account-clean-actions button{width:100%!important}}
+
+/* Persistent robot quick actions and animated home hero */
+.broker-mode .top-actions{gap:9px}
+.quick-robot-cta{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #34415b;border-radius:10px;padding:10px 13px;background:#111b2d;color:#e9effa;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}
+.quick-robot-cta:hover{transform:translateY(-2px);border-color:#e7bd3d;box-shadow:0 6px 22px #e7bd3d20}
+.quick-robot-cta.quick-start{background:linear-gradient(110deg,#e8b923,#f7d66a);border-color:#edc846;color:#141a27}
+.robot-home-hero{position:relative;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);gap:18px;align-items:center;min-height:340px;margin:0 0 18px;padding:34px 38px;overflow:hidden;border:1px solid #2b3c50;border-radius:24px;background:radial-gradient(ellipse at 80% 45%,#123c42 0%,transparent 46%),linear-gradient(125deg,#081322,#0c1a2c 56%,#0a2927);color:#edf4fc}
+.robot-home-copy{position:relative;z-index:2;max-width:610px}
+.robot-home-kicker{display:flex;align-items:center;gap:9px;font-size:10px;font-weight:850;letter-spacing:.16em;color:#a7bacb}
+.robot-home-kicker i{width:7px;height:7px;border-radius:50%;background:#44d8a7;box-shadow:0 0 13px #44d8a7;animation:robotPulse 1.8s ease-in-out infinite}
+.robot-home-copy h2{font-size:clamp(28px,4vw,46px);line-height:1.08;letter-spacing:-.045em;margin:18px 0 12px;color:#f7f9fd}
+.robot-home-copy p{max-width:530px;font-size:13px;line-height:1.8;color:#a6b6c9;margin:0 0 21px}
+.robot-home-actions{display:flex;gap:10px;flex-wrap:wrap}
+.robot-home-actions button{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:11px;padding:13px 17px;font-size:12px;font-weight:850;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.robot-home-actions button:hover{transform:translateY(-2px)}
+.robot-home-connect{background:#132239;border:1px solid #3b536b;color:#e8f1fc}
+.robot-home-start{background:linear-gradient(110deg,#e9bd2e,#f7d96d);border:1px solid #f3d35c;color:#111827;box-shadow:0 8px 28px #e8bd2e1f}
+.robot-home-start span{font-size:17px}
+.robot-home-copy>small{display:block;margin-top:14px;color:#7f91a8;font-size:10px}
+.robot-home-visual{position:relative;min-height:260px;display:grid;place-items:center;overflow:hidden}
+.robot-core{width:118px;height:118px;display:grid;place-items:center;border:1px solid #47d5aa;border-radius:32px;background:linear-gradient(145deg,#123c3a,#0b1c2d);color:#73f0c2;box-shadow:0 0 45px #37d7a52b,inset 0 0 24px #37d7a51b;transform:rotate(-8deg);animation:robotFloat 5s ease-in-out infinite}
+.robot-orbit{position:absolute;width:225px;height:100px;border:1px solid #45d7b052;border-radius:50%;transform:rotate(-28deg);animation:robotOrbit 12s linear infinite}
+.robot-orbit.orbit-b{width:190px;height:230px;transform:rotate(35deg);border-color:#eac64c35;animation-duration:18s;animation-direction:reverse}
+.robot-satellite{position:absolute;z-index:2;padding:7px 10px;border:1px solid #39546a;border-radius:9px;background:#0d1b2b;color:#a8e9d4;font-size:9px;font-weight:850;letter-spacing:.1em;box-shadow:0 8px 20px #0003;animation:robotFloat 4s ease-in-out infinite}
+.robot-satellite.sat-a{top:15%;left:15%}.robot-satellite.sat-b{right:4%;top:40%;animation-delay:-1.2s;color:#f2d46b}.robot-satellite.sat-c{bottom:12%;left:22%;animation-delay:-2s}
+.robot-scanline{position:absolute;width:90%;height:1px;top:50%;background:linear-gradient(90deg,transparent,#5ee9c8aa,transparent);filter:blur(1px);animation:robotScan 4.5s ease-in-out infinite}
+@keyframes robotPulse{0%,100%{opacity:.6;box-shadow:0 0 4px #44d8a7}50%{opacity:1;box-shadow:0 0 16px #44d8a7}}
+@keyframes robotFloat{0%,100%{translate:0 0}50%{translate:0 -9px}}
+@keyframes robotOrbit{to{rotate:360deg}}
+@keyframes robotScan{0%,100%{transform:translateY(-75px);opacity:0}35%,65%{opacity:.8}50%{transform:translateY(75px)}}
+@media(max-width:900px){.quick-robot-cta{padding:9px 10px}.quick-robot-cta svg{display:none}.robot-home-hero{padding:28px;grid-template-columns:1fr .65fr}.robot-home-visual{min-height:210px}}
+@media(max-width:650px){.broker-mode .top-actions{gap:5px}.quick-robot-cta{padding:9px 8px;font-size:10px}.quick-robot-cta svg{display:block;width:12px}.robot-home-hero{grid-template-columns:1fr;padding:25px 21px;gap:0}.robot-home-copy h2{font-size:32px}.robot-home-visual{min-height:190px;max-height:200px}.robot-core{width:85px;height:85px;border-radius:24px}.robot-core svg{width:36px}.robot-orbit{width:175px;height:80px}.robot-orbit.orbit-b{width:145px;height:180px}.robot-satellite.sat-a{left:22%;top:12%}.robot-satellite.sat-b{right:15%;top:36%}.robot-satellite.sat-c{left:25%;bottom:8%}}
+@media(prefers-reduced-motion:reduce){.robot-home-hero *{animation:none!important;transition:none!important}}
