@@ -14,3 +14,5 @@
 .broker-mode .robot-card-head h3,.broker-mode .robot-metrics b{color:#f2f5e9}
 .broker-mode .footer-brand{color:#e9bd3e}
 @media(prefers-reduced-motion:reduce){.broker-mode .brand-mark,.broker-mode .robot-home-hero *{animation:none!important;transition:none!important}}
+
+.broker-mode .brand-mark img{display:block;width:100%;height:100%;max-width:39px;max-height:39px;object-fit:cover;border-radius:11px}
