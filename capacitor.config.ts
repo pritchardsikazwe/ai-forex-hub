@@ -1,7 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'online.kopam.app',
+  // Keep the existing application ID so current Android installs can update in place.
+  appId: 'com.kopela.aitrader',
   appName: 'Kopam.online',
   webDir: 'dist',
   bundledWebRuntime: false,
