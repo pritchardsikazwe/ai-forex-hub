@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.kopela.aitrader',
-  appName: 'Kopela AI Trader',
+  appId: 'online.kopam.app',
+  appName: 'Kopam.online',
   webDir: 'dist',
   bundledWebRuntime: false,
   android: {
