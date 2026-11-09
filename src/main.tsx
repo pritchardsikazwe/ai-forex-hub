@@ -6,8 +6,8 @@ import './kopela-branding.css'
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/ai-forex-hub/sw.js', { scope: '/ai-forex-hub/' }).catch(error => {
-      console.warn('Kopela offline support could not be registered:', error)
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(error => {
+      console.warn('Kopam offline support could not be registered:', error)
     })
   })
 }

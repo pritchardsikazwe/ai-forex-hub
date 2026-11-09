@@ -1,15 +1,15 @@
 {
-  "id": "/ai-forex-hub/",
-  "name": "Kopela AI Trader",
-  "short_name": "Kopela Trader",
-  "description": "Kopela AI Trader — independent trading tools and education.",
-  "start_url": "/ai-forex-hub/",
-  "scope": "/ai-forex-hub/",
+  "id": "/",
+  "name": "Kopam.online",
+  "short_name": "Kopam",
+  "description": "Kopam.online — independent AI-powered trading tools with Exness integration.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#071511",
   "theme_color": "#071511",
   "icons": [
-    { "src": "/ai-forex-hub/kopela-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "/kopela-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }
